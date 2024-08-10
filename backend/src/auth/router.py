@@ -56,7 +56,7 @@ async def login(
         # session_id: str = Cookie(None),
 ):
 
-    # todo: invalidate session if user already logged in
+    # todo: invalidate session if user already logged in (??)
 
     # if session_id:
     #     raise HTTPException(

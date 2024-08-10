@@ -1,14 +1,12 @@
 from typing import Annotated
-
 from fastapi import Depends
-
-from backend.src.config import settings
+from src.config import settings
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 
 engine = create_async_engine(
     settings.database_uri,
-    echo=True,
+    echo=True,  # todo: remove echo
     future=True,
 )
 async_session = async_sessionmaker(

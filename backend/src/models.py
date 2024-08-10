@@ -5,6 +5,7 @@ from sqlalchemy.orm import (
     DeclarativeBase, Mapped, mapped_column, relationship,
     WriteOnlyMapped
 )
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy import String, text, ForeignKey, DateTime
 
 int_pk = Annotated[int, mapped_column(primary_key=True)]
@@ -22,7 +23,7 @@ class Base(DeclarativeBase):
     pass
 
 
-class User(Base):
+class User(AsyncAttrs, Base):
     __tablename__ = 'user'
 
     id: Mapped[int_pk]
@@ -66,7 +67,7 @@ class Round(Base):
     questions: WriteOnlyMapped['Question'] = relationship(back_populates='round')
 
 
-class Session(Base):
+class Session(AsyncAttrs, Base):
     __tablename__ = 'session'
 
     id: Mapped[int_pk]

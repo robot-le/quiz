@@ -1,18 +1,15 @@
-import datetime
-import os
-
-from backend.src.db import SessionDep
-from backend.src.models import Session, User
-from backend.src.config import settings
-from backend.src.auth.auth import AuthHandler
-from backend.src.schemas import ResponseBaseWithObject, User as UserSchema
-
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, status
-from fastapi.security import HTTPBasicCredentials
-from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-
+from typing import Annotated
 from sqlalchemy import select
+
+from src.db import SessionDep
+from src.models import Session, User
+from src.schemas import ResponseBaseWithObject, User as UserSchema
+from src.auth.auth import AuthHandler
+
+from fastapi import APIRouter, Cookie, Depends, HTTPException, status
+from fastapi.security import HTTPBasicCredentials
+from fastapi.responses import JSONResponse
+
 
 router = APIRouter()
 
@@ -45,7 +42,7 @@ async def register(
         obj=UserSchema(
             id=db_user.id,
             username=db_user.username,
-            ),
+        ),
     )
 
 
@@ -53,17 +50,7 @@ async def register(
 async def login(
         user_data: HTTPBasicCredentials,
         db: SessionDep,
-        # session_id: str = Cookie(None),
 ):
-
-    # todo: invalidate session if user already logged in
-
-    # if session_id:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail='You are already logged in',
-    #     )
-
     user_obj = await db.scalar(select(User).where(User.username == user_data.username))
     if not user_obj or not auth_handler.verify_password(user_obj.password, user_data.password):
         raise HTTPException(
@@ -77,13 +64,18 @@ async def login(
 
 
 @router.post(
-        "/logout",
-        dependencies=[Depends(auth_handler.verify_session)],
+    "/logout",
+    dependencies=[Depends(auth_handler.verify_session)],
 )
 async def logout(
-    db: SessionDep,
-    session_id: str = Cookie(),
+        db: SessionDep,
+        session_id: str = Cookie(None),
 ):
+    if not session_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
     session = await db.scalar(select(Session).where(Session.session_id == session_id))
     await db.delete(session)
     await db.commit()
@@ -92,10 +84,14 @@ async def logout(
     return response
 
 
-
-@router.get(
-        '/check-auth',
-        dependencies=[Depends(auth_handler.verify_session)],
-)
-async def check_auth():
-    return {'yay': 'success!'}
+@router.get('/current-user', response_model=ResponseBaseWithObject[UserSchema])
+async def get_current_user(
+        user: Annotated[User, Depends(auth_handler.get_current_user)],
+):
+    return ResponseBaseWithObject[UserSchema](
+        detail='User Authenticated',
+        obj=UserSchema(
+            id=user.id,
+            username=user.username,
+        ),
+    )

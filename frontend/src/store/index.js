@@ -4,12 +4,14 @@ import auth from '@/services/auth'
 export default createStore({
     state: {
         user: null,
-        isAuthenticated: false
+        isAuthenticated: false,
+        lastChecked: null,
     },
     mutations: {
         setUser(state, user) {
             state.user = user
             state.isAuthenticated = !!user
+            state.lastChecked = Date.now()
         }
     },
     actions: {
@@ -25,12 +27,14 @@ export default createStore({
             const user = await auth.register(username, password)
             commit('setUser', user)
         },
-        async fetchCurrentUser({ commit }) {
-            try {
-                const user = await auth.getCurrentUser()
-                commit('setUser', user)
-            } catch (error) {
-                commit('setUser', null)
+        async checkAuth({ commit, state }) {
+            if (!state.isAuthenticated || (Date.now() - state.lastChecked > 600_000)) { // 600_000 ms = 10 min
+                try {
+                    const user = await auth.getCurrentUser()
+                    commit('setUser', user)
+                } catch (error) {
+                    commit('setUser', null)
+                }
             }
         }
     }

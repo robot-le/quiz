@@ -4,7 +4,7 @@ import store from '@/store'
 
 
 const routes = [
-    { path: '/', name: 'Home', component: Home },
+    { path: '/', name: 'Home', component: Home, meta: { requiresGuest: true } },
     {
         path: '/login',
         component: () => import('@/components/Login.vue'),
@@ -30,12 +30,13 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    await store.dispatch('fetchCurrentUser')
-
-    if (to.meta.requiresAuth && !store.state.isAuthenticated) {
-        next('/login')
-    } else if (to.meta.requiresGuest && store.state.isAuthenticated) {
-        next('/dashboard')
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        await store.dispatch('checkAuth')
+        if (!store.state.isAuthenticated) {
+            next('/login')
+        } else {
+            next()
+        }
     } else {
         next()
     }

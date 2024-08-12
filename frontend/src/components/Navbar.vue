@@ -1,19 +1,33 @@
 <script>
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+
+
 export default {
   data() {
     return {
-      foo: 'foo variable'
+      store: useStore()
     }
   },
-  methods: {
-    isLogged() {
-      // return true
-      return false
-    },
-    async logout() {
-      await authService.logout();
-      this.$router.push({ name: 'Login' });
+  computed: {
+    isAuthenticated() {
+      return this.store.state.isAuthenticated;
     }
+  },
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+
+    const logout = async () => {
+      try {
+        await store.dispatch('logout')
+        router.push('/login')
+      } catch (error) {
+        console.error('Logout failed:', error)
+      }
+    }
+
+    return { logout }
   }
 }
 </script>
@@ -30,14 +44,14 @@ export default {
 
       <ul class="nav nav-pills">
 
-        <template v-if="isLogged()">
-        <li class="nav-item"><a href="#" class="nav-link disabled">spacekiddo</a></li>
+        <template v-if="this.isAuthenticated">
+        <li class="nav-item"><a href="#" class="nav-link disabled">{{ this.store.state.user.obj.username }}</a></li>
         <div class="vr"></div>
-        <li class="nav-item"><a href="#" class="nav-link">Logout</a></li>
+        <li class="nav-item"><a href="#" @click="logout" class="nav-link">Logout</a></li>
         </template>
         <template v-else>
-        <li class="nav-item"><a href="/login" class="nav-link">Login</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">Register</a></li>
+        <li class="nav-item"><RouterLink to="/login" class="nav-link">Login</RouterLink></li>
+        <li class="nav-item"><RouterLink to="/register" class="nav-link">Register</RouterLink></li>
         </template>
 
 

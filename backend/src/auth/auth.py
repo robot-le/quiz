@@ -7,9 +7,9 @@ from sqlalchemy import select
 from fastapi import Cookie, status, HTTPException
 from fastapi.security import HTTPBasic
 
-from src.db import SessionDep
-from src.config import settings
-from src.models import User, Session
+from ..db import SessionDep
+from ..config import settings
+from ..models import User, Session
 
 
 class AuthHandler:

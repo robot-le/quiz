@@ -14,8 +14,8 @@ export default createStore({
     },
     actions: {
         async login({ commit }, { username, password }) {
-            const user = await auth.login(username, password)
-            commit('setUser', user)
+            const resp = await auth.login(username, password)
+            commit('setUser', resp)
         },
         async logout({ commit }) {
             await auth.logout()

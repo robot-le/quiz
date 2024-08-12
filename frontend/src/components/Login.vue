@@ -1,10 +1,11 @@
-<!-- src/components/Login.vue -->
 <template>
-  <form @submit.prevent="login">
-    <input v-model="username" type="text" placeholder="Username" required>
-    <input v-model="password" type="password" placeholder="Password" required>
-    <button type="submit">Login</button>
-  </form>
+  <div class="container">
+    <form @submit.prevent="login">
+      <input v-model="username" type="text" placeholder="Username" required>
+      <input v-model="password" type="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
 </template>
 
 <script setup>

@@ -1,10 +1,10 @@
 from typing import Annotated
 from sqlalchemy import select
 
-from src.db import SessionDep
-from src.models import Session, User
-from src.schemas import ResponseBaseWithObject, User as UserSchema
-from src.auth.auth import AuthHandler
+from ..db import SessionDep
+from ..models import Session, User
+from ..schemas import ResponseBaseWithObject, User as UserSchema
+from ..auth.auth import AuthHandler
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, status
 from fastapi.security import HTTPBasicCredentials
